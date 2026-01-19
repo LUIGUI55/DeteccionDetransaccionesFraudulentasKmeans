@@ -15,30 +15,54 @@ def perform_fraud_detection():
     if os.path.exists(csv_path):
         try:
             df = pd.read_csv(csv_path)
-            X = df[["V10", "V14"]].copy()
+            # Ensure required columns exist, fill with mock if missing for robustness
+            required_cols = ["V10", "V14", "Amount", "Class"]
+            if not all(col in df.columns for col in required_cols):
+                 X = get_mock_data()[required_cols]
+            else:
+                 X = df[required_cols].copy()
         except Exception:
-             X = get_mock_data()[["V10", "V14"]]
+             X = get_mock_data()[["V10", "V14", "Amount", "Class"]]
     else:
-        X = get_mock_data()[["V10", "V14"]]
+        X = get_mock_data()[["V10", "V14", "Amount", "Class"]]
 
     # K-Means with 6 clusters as requested (previously 5)
     n_clusters = 6
     kmeans = KMeans(n_clusters=n_clusters, random_state=42)
-    clusters = kmeans.fit_predict(X)
+    clusters = kmeans.fit_predict(X[["V10", "V14"]]) # clustering on V10/V14 only as per original logic
     
-    # Add cluster info to X for plotting convenience (optional, mostly for internal debug if needed)
     X['Cluster'] = clusters
 
-    # Generate Graph
-    plt.figure(figsize=(12, 6))
+    # --- Statistics Calculation ---
+    inertia = kmeans.inertia_
+    n_iter = kmeans.n_iter_
+    centroids = kmeans.cluster_centers_
+    predicted_labels_sample = clusters[:20].tolist()
+
+    # Calculate counts and fraud counts per cluster
+    from collections import Counter
+    cluster_counts = Counter(clusters)
     
-    # Plot decision boundaries
+    # Calculate fraud counts (where Class == 1)
+    fraud_counts = X[X['Class'] == 1].groupby('Cluster').size().to_dict()
+    
+    stats_table = []
+    for i in range(n_clusters):
+        total = cluster_counts.get(i, 0)
+        frauds = fraud_counts.get(i, 0)
+        stats_table.append({
+            'cluster': i,
+            'total': total,
+            'frauds': frauds
+        })
+
+    # --- Graph 1: Main K-Means Plot ---
+    plt.figure(figsize=(10, 6))
     h = .02
     x_min, x_max = X['V10'].min() - 1, X['V10'].max() + 1
     y_min, y_max = X['V14'].min() - 1, X['V14'].max() + 1
     xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
     
-    # Predict for the meshgrid to show boundaries
     Z = kmeans.predict(np.c_[xx.ravel(), yy.ravel()])
     Z = Z.reshape(xx.shape)
     
@@ -47,30 +71,55 @@ def perform_fraud_detection():
                cmap=plt.cm.Pastel2,
                aspect='auto', origin='lower')
 
-    # Plot data points
     plt.scatter(X['V10'], X['V14'], c=clusters, s=5, cmap='viridis', alpha=0.5)
-    
-    # Plot centroids
-    centroids = kmeans.cluster_centers_
-    plt.scatter(centroids[:, 0], centroids[:, 1],
+    centroids_plot = kmeans.cluster_centers_ # Use for plotting
+    plt.scatter(centroids_plot[:, 0], centroids_plot[:, 1],
                 marker='x', s=169, linewidths=3,
                 color='red', zorder=10, label='Centroids')
 
-    plt.title(f'K-Means: Detección de Transacciones Bancarias Fraudulentas ({n_clusters} Clusters)')
+    plt.title(f'K-Means: Detección de Transacciones ({n_clusters} Clusters)')
     plt.xlabel('V10')
     plt.ylabel('V14')
     plt.legend()
     plt.tight_layout()
+    main_graph = get_base64_image(plt)
 
-    # Save to base64
+    # --- Graph 2: Cluster Distribution (Count) ---
+    plt.figure(figsize=(10, 6))
+    sns.countplot(x='Cluster', data=X, palette='viridis')
+    plt.title('Distribución de Transacciones por Cluster')
+    plt.xlabel('Cluster ID')
+    plt.ylabel('Cantidad de Transacciones')
+    plt.tight_layout()
+    dist_graph = get_base64_image(plt)
+
+    # --- Graph 3: Amount Distribution by Cluster (Boxplot) ---
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x='Cluster', y='Amount', data=X, palette='coolwarm')
+    plt.title('Distribución de Montos por Cluster')
+    plt.xlabel('Cluster ID')
+    plt.ylabel('Monto de Transacción')
+    plt.yscale('log') # Log scale to handle large outliers better
+    plt.tight_layout()
+    amount_graph = get_base64_image(plt)
+    
+    return {
+        'main': main_graph,
+        'distribution': dist_graph,
+        'amount': amount_graph,
+        'n_clusters': n_clusters,
+        'inertia': inertia,
+        'n_iter': n_iter,
+        'centroids': centroids.tolist(),
+        'predicted_labels_sample': predicted_labels_sample,
+        'stats_table': stats_table
+    }
+
+def get_base64_image(plt_obj):
     buffer = io.BytesIO()
-    plt.savefig(buffer, format='png')
+    plt_obj.savefig(buffer, format='png')
     buffer.seek(0)
     image_png = buffer.getvalue()
     buffer.close()
-    plt.close()
-
-    graphic = base64.b64encode(image_png)
-    graphic = graphic.decode('utf-8')
-    
-    return graphic, n_clusters
+    plt_obj.close()
+    return base64.b64encode(image_png).decode('utf-8')

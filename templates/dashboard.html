@@ -76,6 +76,7 @@
         .classification-title {
             background: linear-gradient(90deg, #667eea, #764ba2);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 800;
         }
@@ -102,54 +103,166 @@
                         </p>
                     </div>
 
-                    <div class="graph-card text-center">
-                        {% if error %}
-                        <div class="alert alert-danger shadow-sm" role="alert">
-                            <strong>Error del Sistema:</strong> {{ error }}
-                        </div>
-                        {% else %}
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h3 class="classification-title m-0">Modelo K-Means</h3>
-                            <span class="badge-custom">v2.1 Stable</span>
-                        </div>
-
-                        <div class="img-container position-relative">
-                            {% if graph %}
-                            <img src="data:image/png;base64,{{ graph }}" class="img-fluid rounded shadow-sm"
-                                alt="Gráfica de Detección">
-                            {% else %}
-                            <div class="d-flex justify-content-center align-items-center bg-light rounded"
-                                style="height: 400px;">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Generando...</span>
-                                </div>
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="stats-box text-start">
-                            <div class="row align-items-center">
-                                <div class="col-md-6">
-                                    <h5 class="fw-bold text-dark mb-3">Configuración del Modelo</h5>
-                                    <ul class="list-unstyled">
-                                        <li class="mb-2">🎯 <strong>Clusters Detectados:</strong> <span
-                                                class="text-primary fw-bold">{{ n_clusters }}</span> (Optimizado)</li>
-                                        <li class="mb-2">📊 <strong>Variables:</strong> Componentes V10 & V14</li>
-                                        <li class="mb-2">🤖 <strong>Algoritmo:</strong> Unsupervised Learning</li>
-                                    </ul>
-                                </div>
-                                <div class="col-md-6 border-start ps-4">
-                                    <p class="text-muted small">
-                                        Este modelo agrupa transacciones similares para identificar comportamientos
-                                        atípicos.
-                                        Los centroides rojos indican los puntos medios de cada grupo de comportamiento
-                                        detectado.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
+                    {% if error %}
+                    <div class="alert alert-danger shadow-sm" role="alert">
+                        <strong>Error del Sistema:</strong> {{ error }}
                     </div>
+                    {% else %}
+                    <div class="row">
+                        <!-- Main Graph Card -->
+                        <div class="col-12 mb-4">
+                            <div class="graph-card text-center">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h3 class="classification-title m-0">Modelo K-Means (Principal)</h3>
+                                    <span class="badge-custom">6 Clusters</span>
+                                </div>
+
+                                <div class="img-container position-relative">
+                                    {% if graph_main %}
+                                    <img src="data:image/png;base64,{{ graph_main }}"
+                                        class="img-fluid rounded shadow-sm" alt="Gráfica K-Means">
+                                    {% else %}
+                                    <div class="d-flex justify-content-center align-items-center bg-light rounded"
+                                        style="height: 400px;">
+                                        <div class="spinner-border text-primary" role="status"><span
+                                                class="visually-hidden">Generando...</span></div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Secondary Graphs Row -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="graph-card text-center h-100">
+                                <h4 class="classification-title mb-4">Distribución por Cluster</h4>
+                                {% if graph_dist %}
+                                <img src="data:image/png;base64,{{ graph_dist }}" class="img-fluid rounded"
+                                    alt="Distribución">
+                                {% else %}
+                                <p class="text-muted">No disponible</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 mb-4">
+                            <div class="graph-card text-center h-100">
+                                <h4 class="classification-title mb-4">Análisis de Montos</h4>
+                                {% if graph_amount %}
+                                <img src="data:image/png;base64,{{ graph_amount }}" class="img-fluid rounded"
+                                    alt="Montos">
+                                {% else %}
+                                <p class="text-muted">No disponible</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Section -->
+                    <div class="graph-card text-start">
+                        <h5 class="fw-bold text-dark mb-3">Insights del Modelo</h5>
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">🎯 <strong>Clusters Totales:</strong> <span
+                                            class="text-primary fw-bold">{{ n_clusters }}</span></li>
+                                    <li class="mb-2">📊 <strong>Añadido:</strong> Análisis de distribución de
+                                        transacciones.</li>
+                                    <li class="mb-2">💰 <strong>Añadido:</strong> Detección de anomalías en montos ($).
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6 border-start ps-4">
+                                <p class="text-muted small">
+                                    <strong>Gráfica Principal:</strong> Muestra la agrupación espacial basada en
+                                    V10/V14.<br>
+                                    <strong>Distribución:</strong> Ayuda a identificar clusters pequeños (posibles
+                                    fraudes).<br>
+                                    <strong>Montos:</strong> Detecta si los fraudes son de alto o bajo valor (escala
+                                    logarítmica).
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Section -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h3 class="text-center classification-title mb-4">Estadísticas Detalladas del Modelo</h3>
+                        </div>
+
+                        <!-- Metrics & Predictions -->
+                        <div class="col-md-4 mb-4">
+                            <div class="graph-card h-100">
+                                <h5 class="fw-bold mb-3">Métricas de K-Means</h5>
+                                <ul class="list-group list-group-flush mb-3">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Inercia (Suma distancias)
+                                        <span class="badge bg-primary rounded-pill">{{ inertia }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Iteraciones
+                                        <span class="badge bg-secondary rounded-pill">{{ n_iter }}</span>
+                                    </li>
+                                </ul>
+
+                                <h6 class="fw-bold mt-4">Muestra de Predicciones (First 20)</h6>
+                                <p class="small text-muted text-break font-monospace bg-light p-2 rounded">
+                                    {{ predicted_labels_sample }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Cluster Stats Table -->
+                        <div class="col-md-8 mb-4">
+                            <div class="graph-card h-100">
+                                <h5 class="fw-bold mb-3">Análisis de Clusters y Fraudes</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Cluster Label</th>
+                                                <th>Total Elementos</th>
+                                                <th>Elementos Fraudulentos</th>
+                                                <th>Tasa de Fraude</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for stat in stats_table %}
+                                            <tr class="{% if stat.frauds > 0 %}table-warning{% endif %}">
+                                                <td class="fw-bold text-center"><span class="badge bg-dark">{{
+                                                        stat.cluster }}</span></td>
+                                                <td>{{ stat.total }}</td>
+                                                <td class="text-danger fw-bold">{{ stat.frauds }}</td>
+                                                <td>
+                                                    {% widthratio stat.frauds stat.total 100 %}%
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Centroids -->
+                        <div class="col-12 mb-4">
+                            <div class="graph-card">
+                                <h5 class="fw-bold mb-3">Coordenadas de Centroides</h5>
+                                <div class="row">
+                                    {% for centroid in centroids %}
+                                    <div class="col-md-4 col-sm-6 mb-2">
+                                        <div class="p-2 border rounded bg-light small font-monospace">
+                                            <strong>C{{ forloop.counter0 }}:</strong> [{{ centroid.0|floatform:4 }}, {{
+                                            centroid.1|floatform:4 }}]
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
