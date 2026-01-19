@@ -8,7 +8,7 @@ import base64
 from .mock_data import get_mock_data
 import os
 
-def perform_fraud_detection():
+def perform_fraud_detection(n_clusters=6):
     # Try to load real data, otherwise use mock
     csv_path = '/home/luisantonio/Escritorio/deploy7MO/creditcard.csv'
     
@@ -26,8 +26,7 @@ def perform_fraud_detection():
     else:
         X = get_mock_data()[["V10", "V14", "Amount", "Class"]]
 
-    # K-Means with 6 clusters as requested (previously 5)
-    n_clusters = 6
+    # K-Means with dynamic clusters
     kmeans = KMeans(n_clusters=n_clusters, random_state=42)
     clusters = kmeans.fit_predict(X[["V10", "V14"]]) # clustering on V10/V14 only as per original logic
     
