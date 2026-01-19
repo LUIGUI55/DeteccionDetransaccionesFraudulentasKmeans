@@ -253,8 +253,8 @@
                                     {% for centroid in centroids %}
                                     <div class="col-md-4 col-sm-6 mb-2">
                                         <div class="p-2 border rounded bg-light small font-monospace">
-                                            <strong>C{{ forloop.counter0 }}:</strong> [{{ centroid.0|floatform:4 }}, {{
-                                            centroid.1|floatform:4 }}]
+                                            <strong>C{{ forloop.counter0 }}:</strong> [{{ centroid.0 }}, {{ centroid.1
+                                            }}]
                                         </div>
                                     </div>
                                     {% endfor %}

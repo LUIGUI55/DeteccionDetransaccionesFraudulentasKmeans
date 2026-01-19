@@ -103,6 +103,11 @@ def perform_fraud_detection():
     plt.tight_layout()
     amount_graph = get_base64_image(plt)
     
+    # Format centroids for display (avoid template filter issues)
+    formatted_centroids = []
+    for c in centroids:
+        formatted_centroids.append([f"{c[0]:.4f}", f"{c[1]:.4f}"])
+
     return {
         'main': main_graph,
         'distribution': dist_graph,
@@ -110,7 +115,7 @@ def perform_fraud_detection():
         'n_clusters': n_clusters,
         'inertia': inertia,
         'n_iter': n_iter,
-        'centroids': centroids.tolist(),
+        'centroids': formatted_centroids,
         'predicted_labels_sample': predicted_labels_sample,
         'stats_table': stats_table
     }
