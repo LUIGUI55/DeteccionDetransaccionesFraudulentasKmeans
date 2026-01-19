@@ -1,0 +1,8 @@
+django<6
+gunicorn
+whitenoise
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn

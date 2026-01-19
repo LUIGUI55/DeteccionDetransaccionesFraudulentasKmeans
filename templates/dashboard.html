@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detección de Fraude | K-Means AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: var(--primary-gradient) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: white !important;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px 0;
+        }
+
+        .graph-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            padding: 2rem;
+            transition: transform 0.3s ease;
+            border: none;
+        }
+
+        .graph-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .badge-custom {
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 0.5em 1em;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+
+        .stats-box {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        footer {
+            background: #fff;
+            padding: 20px 0;
+            margin-top: auto;
+            border-top: 1px solid #eaeaea;
+        }
+
+        .classification-title {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-shield-lock-fill"></i> FraudGuard AI
+            </a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="text-center mb-5">
+                        <h1 class="display-4 fw-bold">Análisis de Fraude Financiero</h1>
+                        <p class="lead text-muted">Detección de anomalías en tiempo real utilizando Clustering K-Means
+                        </p>
+                    </div>
+
+                    <div class="graph-card text-center">
+                        {% if error %}
+                        <div class="alert alert-danger shadow-sm" role="alert">
+                            <strong>Error del Sistema:</strong> {{ error }}
+                        </div>
+                        {% else %}
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="classification-title m-0">Modelo K-Means</h3>
+                            <span class="badge-custom">v2.1 Stable</span>
+                        </div>
+
+                        <div class="img-container position-relative">
+                            {% if graph %}
+                            <img src="data:image/png;base64,{{ graph }}" class="img-fluid rounded shadow-sm"
+                                alt="Gráfica de Detección">
+                            {% else %}
+                            <div class="d-flex justify-content-center align-items-center bg-light rounded"
+                                style="height: 400px;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Generando...</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="stats-box text-start">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h5 class="fw-bold text-dark mb-3">Configuración del Modelo</h5>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">🎯 <strong>Clusters Detectados:</strong> <span
+                                                class="text-primary fw-bold">{{ n_clusters }}</span> (Optimizado)</li>
+                                        <li class="mb-2">📊 <strong>Variables:</strong> Componentes V10 & V14</li>
+                                        <li class="mb-2">🤖 <strong>Algoritmo:</strong> Unsupervised Learning</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6 border-start ps-4">
+                                    <p class="text-muted small">
+                                        Este modelo agrupa transacciones similares para identificar comportamientos
+                                        atípicos.
+                                        Los centroides rojos indican los puntos medios de cada grupo de comportamiento
+                                        detectado.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center text-muted small">
+        <div class="container">
+            <p class="mb-0">© 2026 Developed with Django & Scikit-Learn | Deployed on Railway</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
