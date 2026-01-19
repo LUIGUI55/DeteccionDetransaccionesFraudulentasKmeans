@@ -1,3 +1,7 @@
+import pandas as pd
+import numpy as np
+from sklearn.datasets import make_blobs
+
 def get_mock_data(n_samples=1000):
     """
     Generates mock data for V10, V14, Amount, and Class to simulate credit card transactions.
