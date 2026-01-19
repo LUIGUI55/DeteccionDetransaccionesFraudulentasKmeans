@@ -1,3 +1,6 @@
+from django.shortcuts import render
+from .services import perform_fraud_detection
+
 def dashboard_view(request):
     try:
         results = perform_fraud_detection()
